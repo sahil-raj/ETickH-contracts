@@ -23,12 +23,22 @@ contract ETickH is Ownable {
 
     mapping(address => ETickHEvent[]) internal eventMapping;
 
-    function createEvent(string memory _eventName, uint _startTime, uint _eventDuration, uint _tktCount, _tktPrice, address[] _orgs) public returns(bool) {
-        
+    modifier createETickH(string memory _eventName, uint _startTime, uint _eventDuration, uint _tktCount) {
+        require(bytes(_eventName).length > 0, "Event must have a name");
+        require(_startTime+_eventDuration >= block.timestamp, "Event must be in future");
+        require(_tktCount > 0, "Event must have tickets");
+        _;
+    }
 
+    function createEvent(string memory _eventName, uint _startTime, uint _eventDuration, uint _tktCount, uint _tktPrice, address[] _orgs) createETickH(_eventName, _startTime, _eventDuration, _tktCount) public returns(bool) {
+
+        ETickHEvent myEvent = ETickHEvent(++eventCount, _eventName, _startTime, _eventDuration, _tktCount, _tktPrice, msg.sender, _orgs);
         return true;
     }
-    
 
+    function buyTicket(address _eventCreator, uint _eventId, uint _ticketCount) public returns(bool) {
+        (bool success,) = ; 
+        return success;
+    }
 
 }
