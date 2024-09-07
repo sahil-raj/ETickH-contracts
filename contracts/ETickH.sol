@@ -17,7 +17,7 @@ contract ETickH is Ownable {
         uint event_duration;
         uint ticket_count;
         uint ticket_price;
-        address creator;
+        address payable creator;
         address[] organizers;
     }
 
@@ -30,15 +30,36 @@ contract ETickH is Ownable {
         _;
     }
 
-    function createEvent(string memory _eventName, uint _startTime, uint _eventDuration, uint _tktCount, uint _tktPrice, address[] _orgs) createETickH(_eventName, _startTime, _eventDuration, _tktCount) public returns(bool) {
+    function createEvent(string memory _eventName, uint _startTime, uint _eventDuration, uint _tktCount, uint _tktPrice, address[] memory _orgs) createETickH(_eventName, _startTime, _eventDuration, _tktCount) public returns(bool) {
 
-        ETickHEvent myEvent = ETickHEvent(++eventCount, _eventName, _startTime, _eventDuration, _tktCount, _tktPrice, msg.sender, _orgs);
+        ETickHEvent memory myEvent = ETickHEvent(++eventCount, _eventName, _startTime, _eventDuration, _tktCount, _tktPrice, payable(msg.sender), _orgs);
+
+        eventMapping[msg.sender].push(myEvent);
+
         return true;
     }
 
-    function buyTicket(address _eventCreator, uint _eventId, uint _ticketCount) public returns(bool) {
-        (bool success,) = ; 
+    function buyTicket(address _eventCreator, uint _eventId, uint _ticketCount) public payable returns(bool) {
+        bool success = false;
+
+        for (uint i=0; i< eventMapping[_eventCreator].length; ++i) {
+            if (eventMapping[_eventCreator][i].event_id == _eventId) {
+                success = eventMapping[_eventCreator][i].creator.send(msg.value);
+                break;
+            }
+        }
+
         return success;
     }
 
 }
+
+// address payable recipient = 0x1234567890abcdef1234567890abcdef12345678;
+
+// function sendEtherUsingSend() public payable {
+//     bool success = recipient.send(msg.value);
+//     if (!success) {
+//         // Handle failure (e.g., revert the transaction or take other action)
+//         revert("Ether transfer failed.");
+//     }
+// }
